@@ -9,8 +9,8 @@ import (
 	"github.com/nlopes/slack"
 )
 
-func runScript() (string, error) {
-	b, err := exec.Command("cowsay", "foo").Output()
+func runScript(cmd string, args []string) (string, error) {
+	b, err := exec.Command(cmd, args...).Output()
 	return string(b), err
 }
 
@@ -22,13 +22,27 @@ func runScript() (string, error) {
 func main() {
 	var token = flag.String("token", "", "slack api token")
 	var botID = flag.String("bot-id", "U8HV269AT", "id of bot in order to detect mentions")
+	var cmdStr = flag.String("cmd", "echo foo bar cat", "command to be run including args")
+
 	//var monitorChannel = flag.String("monitor-channel", "backend",
 	//	"channel to monitor for mentions / to post to")
 
 	flag.Parse()
 
+	fmt.Printf("using cmd [%s]\n", *cmdStr)
+
 	if *token == "" {
 		panic("no token provided")
+	}
+
+	var cmd string
+	var args []string
+	for i, v := range strings.Split(*cmdStr, " ") {
+		if i == 0 {
+			cmd = v
+		} else {
+			args = append(args, v)
+		}
 	}
 
 	// start a websocket-based Real Time API session
@@ -54,7 +68,7 @@ func main() {
 				fmt.Println("no mention")
 				continue
 			}
-			scriptOutput, err := runScript()
+			scriptOutput, err := runScript(cmd, args)
 			if err != nil {
 				// should be graceful?
 				panic(err)
