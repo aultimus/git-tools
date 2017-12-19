@@ -3,13 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/nlopes/slack"
 )
 
 func runScript() (string, error) {
-	return "foobar", nil
+	b, err := exec.Command("cowsay", "foo").Output()
+	return string(b), err
 }
 
 // roadmap
